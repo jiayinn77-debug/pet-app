@@ -203,7 +203,7 @@ export const Settings = () => {
             className="rounded-[24px] p-5 flex flex-col justify-between min-h-[130px] transition-all border border-[#F2F2F2] bg-[#F9F9F9] cursor-pointer active:scale-95"
           >
             <div className="flex justify-between items-start">
-              <span className="material-symbols-outlined text-[#333] text-xl font-light">bluetooth_drive</span>
+              <span className="material-symbols-outlined text-[#333] text-xl font-light">bluetooth</span>
               <div className={cn(
                 "px-2 py-0.5 rounded-full flex items-center gap-1",
                 isConnected ? "bg-white" : "bg-[#EEE]/50"
@@ -215,7 +215,7 @@ export const Settings = () => {
               </div>
             </div>
             <div className="space-y-1 mt-2">
-              <h3 className="text-[13px] font-bold text-[#333] tracking-tight">ESP32 Collar</h3>
+              <h3 className="text-[13px] font-bold text-[#333] tracking-tight">项圈配件</h3>
               <div className="flex justify-between items-center">
                 <span className="text-[11px] font-bold text-blue-500 tracking-tight">同步中</span>
                 <div className="flex items-center gap-1 text-[#CCC]">
@@ -242,7 +242,7 @@ export const Settings = () => {
               </div>
             </div>
             <div className="space-y-1 mt-2">
-              <h3 className={cn("text-[13px] font-bold tracking-tight", (isPendantConnected || isSyncing) ? "text-[#333]" : "text-[#CCC]")}>Hologram Pendant</h3>
+              <h3 className={cn("text-[13px] font-bold tracking-tight", (isPendantConnected || isSyncing) ? "text-[#333]" : "text-[#CCC]")}>随身挂件</h3>
               <div className={cn("flex gap-4", isPendantConnected ? "text-[#999]" : "text-[#CCC]")}>
                 <div className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">{isPendantConnected ? 'battery_horiz_075' : isSyncing ? 'hourglass_empty' : 'battery_unknown'}</span>
@@ -275,7 +275,7 @@ export const Settings = () => {
         {/* 退出按钮 */}
         <div className="mt-auto pb-4">
           <button onClick={handleLogout} className="w-full py-4 bg-[#333] text-white rounded-[20px] text-[14px] font-bold tracking-[0.1em] flex items-center justify-center gap-3 active:scale-[0.97] transition-all">
-            <span className="material-symbols-outlined text-sm">logout</span> SIGN OUT
+            <span className="material-symbols-outlined text-sm">logout</span> 退出登录
           </button>
         </div>
       </div>

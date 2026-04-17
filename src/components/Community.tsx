@@ -47,7 +47,7 @@ const DEFAULT_POSTS: Post[] = [
     dist: '300米',
     time: new Date(Date.now() - 1800000).toISOString(),
     status: '活跃中',
-    img: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400',
+    img: 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/0ea898fae8bb69143e0332bc7f2b055a.jpg',
     desc: '今天在公园尝试了新的飞盘，毛孩子表现得太棒了！',
     likes: 12,
     comments: [
@@ -60,8 +60,8 @@ const DEFAULT_POSTS: Post[] = [
     dist: '1.2公里',
     time: new Date(Date.now() - 3600000 * 24).toISOString(),
     status: '休息中',
-    img: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=400',
-    desc: '海浪背陆山俯仰，风帆长共客飘摇。',
+    img: 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/62a4c8393a2085f876a2aa96844fe67c.jpg',
+    desc: '今天吃到星巴克的奶油啦！！！！',
     likes: 5,
     comments: []
   }
@@ -70,7 +70,7 @@ const DEFAULT_POSTS: Post[] = [
 export const Community: React.FC<CommunityProps> = ({ onPublishingChange }) => {
   const [communityList, setCommunityList] = useState<Post[]>(() => {
     try {
-      const saved = localStorage.getItem('local_community_posts');
+      const saved = localStorage.getItem('local_community_posts_v2');
       return saved ? JSON.parse(saved) : DEFAULT_POSTS;
     } catch (e) {
       return DEFAULT_POSTS;

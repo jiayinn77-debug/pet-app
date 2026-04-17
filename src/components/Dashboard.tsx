@@ -11,16 +11,16 @@ export const Dashboard = ({ onNavigate }: { onNavigate: (tab: string) => void })
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const targetImage = useMemo(() => {
-    if (!isConnected || !dogStatus || dogStatus === 'Offline') return '/idle.png';
+    if (!isConnected || !dogStatus || dogStatus === 'Offline') return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/idle.png';
     const status = String(dogStatus).split(',')[0].trim().toLowerCase();
     switch (status) {
-      case 'eat':   return '/eat.png';
-      case 'walk':  return '/walk.png';
-      case 'sleep': return '/sleep.png';
-      case 'sit':   return '/sit.png';
-      case 'idle':  return '/idle.png';
-      case 'barking':  return '/barking.png';
-      default:      return '/idle.png';
+      case 'eat':   return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/eat.png';
+      case 'walk':  return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/walk.png';
+      case 'sleep': return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/sleep.png';
+      case 'sit':   return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/sit.png';
+      case 'idle':  return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/idle.png';
+      case 'barking':  return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/barking.png';
+      default:      return 'https://kockgextkiqsrgghybkd.supabase.co/storage/v1/object/public/avatars/idle.png';
     }
   }, [isConnected, dogStatus]);
 
