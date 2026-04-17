@@ -1,0 +1,5 @@
+{
+  "name": "EchoPet Precision",
+  "description": "A high-precision pet monitoring dashboard with real-time vitals and activity tracking.",
+  "requestFramePermissions": []
+}
