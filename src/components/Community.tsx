@@ -70,7 +70,7 @@ const DEFAULT_POSTS: Post[] = [
 export const Community: React.FC<CommunityProps> = ({ onPublishingChange }) => {
   const [communityList, setCommunityList] = useState<Post[]>(() => {
     try {
-      const saved = localStorage.getItem('local_community_posts_v2');
+      const saved = localStorage.getItem('local_community_posts');
       return saved ? JSON.parse(saved) : DEFAULT_POSTS;
     } catch (e) {
       return DEFAULT_POSTS;
