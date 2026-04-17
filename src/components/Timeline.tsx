@@ -278,11 +278,11 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
                <span className="material-symbols-outlined">{phonePos ? 'my_location' : 'location_off'}</span>
             </div>
             <div>
-              <p className="text-[13px] font-bold">{phonePos ? '手机定位已锁定' : '正在获取手机位置...'}</p>
+              <p className="text-[13px] font-bold">{phonePos ? '定位已锁定' : '正在获取位置...'}</p>
               <p className="text-[11px] text-[#666]">
                 {phonePos 
                   ? `当前位置: ${phonePos.lng.toFixed(4)}, ${phonePos.lat.toFixed(4)}` 
-                  : '请确保已开启手机定位并授予权限'}
+                  : '请确保已开启定位'}
               </p>
             </div>
           </div>
