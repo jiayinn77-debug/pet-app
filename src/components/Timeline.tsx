@@ -5,7 +5,7 @@ import AMapLoader from '@amap/amap-jsapi-loader';
 import { RoutingIcon } from './Icons/RoutingIcon';
 import { createClient } from '@supabase/supabase-js';
 
-// --- Supabase 客户端初始化 (保持原样) ---
+// --- Supabase 客户端初始化 ---
 const supabase = createClient(
   'https://kockgextkiqsrgghybkd.supabase.co', 
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvY2tnZXh0a2lxc3JnZ2h5YmtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MTUzNzMsImV4cCI6MjA4OTk5MTM3M30.PvaihC7l5lcTL49XXvXzUOY7Ft20Zg03Mev_UVRPGrw'
@@ -28,6 +28,15 @@ interface TimelineProps {
   bluetoothData?: string; 
 }
 
+// 状态汉化映射表
+const STATUS_MAP: Record<string, string> = {
+  'sleep': '正在睡觉',
+  'idle': '原地休息',
+  'run': '欢快奔跑',
+  'walk': '悠闲散步',
+  'play': '尽情玩耍',
+};
+
 export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: TimelineProps) => {
   const [petName, setPetName] = useState('我的足迹');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -35,9 +44,7 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
   const mapInstance = useRef<any>(null);
   const petMarkerRef = useRef<any>(null);
   
-  // 状态：蓝牙解析出的位置
   const [realtimePos, setRealtimePos] = useState<{lat: number, lng: number} | null>(null);
-  // 新增状态：手机自身的实时位置
   const [phonePos, setPhonePos] = useState<{lat: number, lng: number} | null>(null);
 
   const [personalLogs, setPersonalLogs] = useState<ActivityLog[]>(() => {
@@ -72,21 +79,50 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
     }
   }, [bluetoothData]);
 
-  // --- 加载 Supabase 历史足迹 ---
+  // --- 加载 Supabase 历史足迹（含汉化逻辑） ---
   useEffect(() => {
     const loadInitialData = async () => {
-      const { data, error } = await supabase.from('dog_photo').select('*').order('created_at', { ascending: false });
-      if (data) {
-        const dbLogs: ActivityLog[] = data.map(item => ({
-          id: item.id.toString(),
-          day: formatDay(new Date(item.created_at)),
-          time: formatTime(new Date(item.created_at)),
-          status: item.status || '自动捕捉',
-          color: '#FF2442',
-          imageUrl: processImageUrl(item.image_url),
-          description: item.description || '项圈捕捉到的精彩瞬间！',
-          timestamp: new Date(item.created_at).getTime()
-        }));
+      const [photoRes, statusRes] = await Promise.all([
+        supabase.from('dog_photo').select('*').order('created_at', { ascending: false }),
+        supabase.from('dog_status').select('state, updated_at').order('updated_at', { ascending: false })
+      ]);
+
+      if (photoRes.data) {
+        const dbLogs: ActivityLog[] = photoRes.data.map(item => {
+          const photoTimestamp = new Date(item.created_at).getTime();
+          
+          let rawStatus = (item.status || '自动捕捉').toLowerCase();
+          let statusColor = '#FF2442';
+
+          if (statusRes.data && statusRes.data.length > 0) {
+            const closest = statusRes.data.reduce((prev, curr) => {
+              const currDiff = Math.abs(new Date(curr.updated_at).getTime() - photoTimestamp);
+              const prevDiff = Math.abs(new Date(prev.updated_at).getTime() - photoTimestamp);
+              return currDiff < prevDiff ? curr : prev;
+            });
+
+            const finalDiff = Math.abs(new Date(closest.updated_at).getTime() - photoTimestamp);
+            if (finalDiff < 15 * 60 * 1000) {
+              rawStatus = closest.state.toLowerCase();
+              if (rawStatus === 'sleep') statusColor = '#5856D6';
+              if (rawStatus === 'idle') statusColor = '#999999';
+            }
+          }
+
+          // 执行汉化转换
+          const displayStatus = STATUS_MAP[rawStatus] || rawStatus;
+
+          return {
+            id: item.id.toString(),
+            day: formatDay(new Date(item.created_at)),
+            time: formatTime(new Date(item.created_at)),
+            status: displayStatus,
+            color: statusColor,
+            imageUrl: processImageUrl(item.image_url),
+            description: item.description || `检测到宠物行为变化，已自动记录`,
+            timestamp: photoTimestamp
+          };
+        });
         setPersonalLogs(dbLogs);
       }
     };
@@ -113,7 +149,7 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // --- 实时地图渲染逻辑 (修改点：开启实时手机定位监听) ---
+  // --- 实时地图渲染逻辑 ---
   useEffect(() => {
     let map: any = null;
     let geolocation: any = null;
@@ -132,23 +168,19 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
         });
         mapInstance.current = map;
 
-        // 配置高精度定位插件
         geolocation = new AMap.Geolocation({
-          enableHighAccuracy: true, // 开启高精度定位
+          enableHighAccuracy: true,
           timeout: 10000,
           buttonPosition: 'RB',
           buttonOffset: [20, 80],
-          showMarker: true,        // 显示手机蓝点
-          showCircle: true,        // 显示定位精度圆
-          panToLocation: true,     // 定位成功后地图中心移动到手机位置
+          showMarker: true,
+          showCircle: true,
+          panToLocation: true,
           zoomToAccuracy: true,
         });
         map.addControl(geolocation);
-
-        // 核心修改：使用 watchPosition 实现持续实时定位更新
         geolocation.watchPosition();
 
-        // 监听手机位置改变
         AMap.Event.addListener(geolocation, 'complete', (data: any) => {
           setPhonePos({
             lat: data.position.getLat(),
@@ -156,13 +188,12 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
           });
         });
 
-        // 创建宠物实时 Marker
         const petMarker = new AMap.Marker({
           content: `
             <div style="position: relative;">
               <div style="background: #FF2442; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
                 <div style="width: 20px; height: 20px; background: white; border-radius: 50%; transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">
-                   <span style="color: #FF2442; font-size: 12px; font-weight: bold;">🐾</span>
+                    <span style="color: #FF2442; font-size: 12px; font-weight: bold;">🐾</span>
                 </div>
               </div>
             </div>`,
@@ -281,7 +312,7 @@ export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: Timel
               <p className="text-[13px] font-bold">{phonePos ? '定位已锁定' : '正在获取位置...'}</p>
               <p className="text-[11px] text-[#666]">
                 {phonePos 
-                  ? `当前位置: ${phonePos.lng.toFixed(4)}, ${phonePos.lat.toFixed(4)}` 
+                  ? `当前位置: ${phonePos.lng.toFixed(4)}, ${phonePos.lat.toFixed(4)}`
                   : '请确保已开启定位'}
               </p>
             </div>
