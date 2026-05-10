@@ -35,6 +35,7 @@ const STATUS_MAP: Record<string, string> = {
   'run': '欢快奔跑',
   'walk': '悠闲散步',
   'play': '尽情玩耍',
+  'sit': '坐下发呆',
 };
 
 export const Timeline = ({ isPublishing, setIsPublishing, bluetoothData }: TimelineProps) => {
